@@ -1,178 +1,212 @@
-// import { StatusBar } from "expo-status-bar";
 import { useState, useRef } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { Text, View, TextInput, Alert } from "react-native";
+import { TouchableOpacity } from "react-native-web";
+import { view, viewChilds } from "./assets/styles/styles";
 
 export default function App() {
-  const [identificacion, setIdentifacacion] = useState("");
+  const [identificacion, setIdentificacion] = useState("");
+  const [nombres, setNombres] = useState("");
+  const [asignatura, setAsignatura] = useState("");
   const [nota1, setNota1] = useState("");
   const [nota2, setNota2] = useState("");
   const [nota3, setNota3] = useState("");
   const [definitiva, setDefinitiva] = useState("");
   const [observacion, setObservacion] = useState("");
+  const [datosUsuario, setDatosUsuario] = useState([]);
 
-  let refIdentificacion = useRef();
-
-  const guardar = () => {
-  setDefinitiva(
-    (parseFloat(nota1) + parseFloat(nota2) + parseFloat(nota3)) / 3
-  );
-
-    setDefinitiva((def) => [
-      def,
-      { identificacion: identificacion, definitiva: definitiva },
-    ]);
-    setIdentifacacion("");
-    setDefinitiva("");
-    refIdentificacion.current.focus();
+  const guardarcalcular = () => {
+    parseInt(identificacion);
+    parseInt(definitiva);
+    let resultadoDefinitiva = 0;
+    if (identificacion.trim()) {
+      if (nombres.trim()) {
+        if (asignatura.trim()) {
+          if (nota1.trim() && nota1 <= 5) {
+            if (nota2.trim() && nota2 <= 5) {
+              if (nota3.trim() && nota3 <= 5) {
+                resultadoDefinitiva =
+                  (parseFloat(nota1) + parseFloat(nota2) + parseFloat(nota3)) /
+                  3;
+                if (resultadoDefinitiva >= 3) {
+                  setObservacion("Aprueba");
+                  let observacionFinal = "Aprueba";
+                  setDefinitiva(
+                    (resultadoDefinitiva = resultadoDefinitiva.toFixed(2))
+                  );
+                  guardar(resultadoDefinitiva, observacionFinal);
+                } else if (
+                  resultadoDefinitiva >= 2 &&
+                  resultadoDefinitiva <= 2.94
+                ) {
+                  setObservacion("Habilita");
+                  let observacionFinal = "Habilita";
+                  setDefinitiva(resultadoDefinitiva);
+                  guardar(resultadoDefinitiva, observacionFinal);
+                } else if (resultadoDefinitiva < 2) {
+                  setObservacion("Reprueba");
+                  let observacionFinal = "Reprueba";
+                  setDefinitiva(resultadoDefinitiva);
+                  guardar(resultadoDefinitiva, observacionFinal);
+                }
+              } else {
+                alert("Porfavor digite la nota del momento 3");
+              }
+            } else {
+              alert("Porfavor digite la nota del momento 2");
+            }
+          } else {
+            alert("Porfavor digite la nota del momento 1");
+          }
+        } else {
+          alert("Porfavor digite una asignatura");
+        }
+      } else {
+        alert("Porfavor digite un nombre");
+      }
+    } else {
+      alert("Porfavor digita la identificacion");
+    }
   };
 
-  let buscar = (nomBuscar) => {
-    let nomEncontrado = definitiva.find((res) => res.identificacion == identificacion)
-    if (condition) {
-      
+  const guardar = (resultadoDefinitiva, observacionFinal) => {
+    setDatosUsuario((datos) => [
+      ...datos,
+      {
+        identificacion: identificacion,
+        nombres: nombres,
+        asignatura: asignatura,
+        nota1: nota1,
+        nota2: nota2,
+        nota3: nota3,
+        definitiva: resultadoDefinitiva,
+        observacion: observacionFinal,
+      },
+    ]);
+  };
+
+  let buscar = () => {
+    let identBuscar = datosUsuario.find(
+      (ident) => ident.identificacion == identificacion
+    );
+    if (identBuscar != undefined) {
+      setNombres(identBuscar.nombres);
+      setAsignatura(identBuscar.asignatura);
+      setNota1(identBuscar.nota1);
+      setNota2(identBuscar.nota2);
+      setNota3(identBuscar.nota3);
+      setDefinitiva(identBuscar.definitiva);
+      setObservacion(identBuscar.observacion);
+    } else {
+      alert("nombre no hallado");
     }
-  }
+  };
 
-  // let calcular = (pro) => {
-  //   let op = 0;
-  //   switch (pro) {
-  //     case ">= 3.0":
-  //       op = 
-      
-          
-    
-  //     default:
-  //       break;
-  //   }
-  // }
-
-
-  let limpiar = () => {
+  const limpiar = () => {
+    setNombres("");
+    setAsignatura("");
+    setIdentificacion("");
     setNota1("");
     setNota2("");
     setNota3("");
     setDefinitiva("");
+    setObservacion("");
   };
-
   return (
-    <View style={{}}>
-      <Text style={styles.estiloTitulo}>Sistemas de notas</Text>
-      {/* <StatusBar style="auto" /> */}
-
-      <View style={{ flexDirection: "column" }}>
-        <TextInput
-          style={[styles.estiloInput, { marginTop: "50px" }]}
-          placeholder="Digite identificación"
-          required
-        ></TextInput>
-
-        <TextInput
-          style={[styles.estiloInput]}
-          placeholder="Digite nombre"
-          required
-        ></TextInput>
-        <View>
+    <View style={[view.container, view.alignViews]}>
+      <Text style={[view.textTitle]}>Sistema de Notas</Text>
+      <View style={[viewChilds.containerBackground]}>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Identificación: </Text>
           <TextInput
-            style={[styles.estiloInput]}
-            placeholder="Digite asignatura"
-            required
-          ></TextInput>
-          
+            style={[viewChilds.containerInput]}
+            keyboardType={Number}
+            maxLength={20}
+            onChangeText={(identificacion) => setIdentificacion(identificacion)}
+            value={identificacion}></TextInput>
+        </View>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Nombres: </Text>
           <TextInput
-            style={[styles.estiloInput]}
-            placeholder="Nota momento 1"
-            onChangeText={(nota1) => setNota1(nota1)}
+            style={[viewChilds.containerInput]}
+            value={nombres}
+            maxLength={100}
+            onChangeText={(nombres) => setNombres(nombres)}></TextInput>
+        </View>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Asignatura: </Text>
+          <TextInput
+            style={[viewChilds.containerInput]}
+            value={asignatura}
+            maxLength={100}
+            onChangeText={(asignatura) =>
+              setAsignatura(asignatura)
+            }></TextInput>
+        </View>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Nota Momento 1 (30%): </Text>
+          <TextInput
+            style={[viewChilds.containerInput]}
+            keyboardType={Number}
+            maxLength={4}
             value={nota1}
-            required
-          ></TextInput>
+            onChangeText={(nota1) => setNota1(nota1)}></TextInput>
         </View>
-
-        <View>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Nota Momento 2 (35%): </Text>
           <TextInput
-            style={[styles.estiloInput]}
-            placeholder="Nota momento 2"
-            onChangeText={(nota2) => setNota2(nota2)}
+            style={[viewChilds.containerInput]}
+            keyboardType={Number}
             value={nota2}
-            required
-          ></TextInput>
-
+            maxLength={4}
+            onChangeText={(nota2) => setNota2(nota2)}></TextInput>
+        </View>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Nota Momento 3 (35%): </Text>
           <TextInput
-            style={[styles.estiloInput]}
-            placeholder="Nota momento 3"
-            onChangeText={(nota3) => setNota3(nota3)}
+            style={[viewChilds.containerInput]}
+            keyboardType={Number}
             value={nota3}
-            required
-          ></TextInput>
+            maxLength={4}
+            onChangeText={(nota3) => setNota3(nota3)}></TextInput>
         </View>
-
-        <View style={{}}>
-          <text style={{ marginLeft: 3 }}>Definitiva</text>
-          <text>{definitiva}</text>
-
-          <text style={{ marginTop: 10, marginLeft: 3 }}>Observación</text>
-          <text>{observacion}</text>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Defitiniva: {definitiva}</Text>
+          <Text
+            style={[viewChilds.containerInput]}
+            keyboardType={Number}
+            value={definitiva}></Text>
         </View>
-
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.estiloBoton}
-          onPress={() => guardar()}>
-            <Text>Calcular/guardar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.estiloBoton} onPress={limpiar}>
-            <Text>Limpiar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.estiloBoton}>
-            <Text>Buscar</Text>
-          </TouchableOpacity>
+        <View
+          style={[viewChilds.containerDirection, viewChilds.containerDatos]}>
+          <Text>Observación: </Text>
+          <Text style={[viewChilds.containerInput]} value={observacion}>
+            {observacion}
+          </Text>
         </View>
+      </View>
+      <View
+        style={[
+          viewChilds.containerDirection,
+          viewChilds.containerButton,
+          view.alignViews,
+        ]}>
+        <TouchableOpacity onPress={guardarcalcular} style={[viewChilds.button]}>
+          <Text style={[viewChilds.textButton]}>Calcular/Guardar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={buscar} style={[viewChilds.button]}>
+          <Text style={[viewChilds.textButton]}>Buscar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={limpiar} style={[viewChilds.button]}>
+          <Text style={[viewChilds.textButton]}>Limpiar</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  estiloTitulo: {
-    textAlign: "center",
-    fontSize: 30,
-    marginTop: 20,
-    color: "orange",
-  },
-
-  row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-
-  estiloInput: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderStyle: "solid",
-    alignSelf: "flex-start",
-    marginHorizontal: "1%",
-    marginBottom: 15,
-    minWidth: "15%",
-  },
-  estiloBoton: {
-    backgroundColor: "orange",
-    borderRadius: 10,
-    padding: 10,
-    margin: 5,
-  },
-});
